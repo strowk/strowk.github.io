@@ -18,7 +18,7 @@
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var sortedWith = Kotlin.kotlin.collections.sortedWith_eknfly$;
-  var maxWith = Kotlin.kotlin.collections.maxWith_eknfly$;
+  var first = Kotlin.kotlin.collections.first_2p1efm$;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var toList = Kotlin.kotlin.collections.toList_7wnvza$;
@@ -194,19 +194,9 @@
     this.gameHistory = gameHistory;
     this.left = left;
   }
-  Object.defineProperty(PersonalGameHistory.prototype, 'results', {
-    get: function () {
-      var $receiver = this.gameHistory.gameResults;
-      var destination = Kotlin.kotlin.collections.ArrayList_init_ww73n8$(Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$($receiver, 10));
-      var tmp$;
-      tmp$ = $receiver.iterator();
-      while (tmp$.hasNext()) {
-        var item = tmp$.next();
-        destination.add_11rb$(PersonalGameResult_init(item, this.left));
-      }
-      return destination;
-    }
-  });
+  PersonalGameHistory.prototype.get_za3lpa$ = function (i) {
+    return PersonalGameResult_init(this.gameHistory.gameResults.get_za3lpa$(i), this.left);
+  };
   PersonalGameHistory.$metadata$ = {
     kind: Kotlin.Kind.CLASS,
     simpleName: 'PersonalGameHistory',
@@ -238,7 +228,7 @@
       return GameChoice$COOPERATE_getInstance();
     }
      else {
-      return it.results.get_za3lpa$(it.gameHistory.currentRound - 1 | 0).opponentChoice;
+      return it.get_za3lpa$(it.gameHistory.currentRound - 1 | 0).opponentChoice;
     }
   }
   function Strategy$defaults$smartOne$lambda(it) {
@@ -250,8 +240,8 @@
         return GameChoice$COOPERATE_getInstance();
       }
        else {
-        var firstOpponentChoice = it.results.get_za3lpa$(0).opponentChoice;
-        var secondOpponentChoice = it.results.get_za3lpa$(1).opponentChoice;
+        var firstOpponentChoice = it.get_za3lpa$(0).opponentChoice;
+        var secondOpponentChoice = it.get_za3lpa$(1).opponentChoice;
         if (firstOpponentChoice === GameChoice$CHEAT_getInstance() && secondOpponentChoice === GameChoice$CHEAT_getInstance()) {
           GameChoice$CHEAT_getInstance();
         }
@@ -322,10 +312,10 @@
     return SimpleStrongestNeighbourMutation$Companion_instance;
   }
   function SimpleStrongestNeighbourMutation$mutate$lambda(player1, player2) {
-    return Kotlin.primitiveCompareTo(player1.generationIncomeToShow, player2.generationIncomeToShow);
+    return Kotlin.primitiveCompareTo(player1.generationIncomeToShow, player2.generationIncomeToShow) * -1 | 0;
   }
   SimpleStrongestNeighbourMutation.prototype.mutate_akjf9f$ = function (player) {
-    var tmp$, tmp$_0;
+    var tmp$;
     if (this.random.nextDouble() > 1.0 - this.distortion) {
       return null;
     }
@@ -336,18 +326,27 @@
     }
     var $receiver = gamePosition.neighborPositions;
     var destination = Kotlin.kotlin.collections.ArrayList_init_ww73n8$(Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$($receiver, 10));
-    var tmp$_1;
-    tmp$_1 = $receiver.iterator();
-    while (tmp$_1.hasNext()) {
-      var item = tmp$_1.next();
+    var tmp$_0;
+    tmp$_0 = $receiver.iterator();
+    while (tmp$_0.hasNext()) {
+      var item = tmp$_0.next();
       destination.add_11rb$(item.player);
     }
-    tmp$ = maxWith(sortedWith(destination, getShuffleComparator(Kotlin.getKClass(Player), this.random)), new Kotlin.kotlin.Comparator_x4fedy$$f(SimpleStrongestNeighbourMutation$mutate$lambda));
-    if (tmp$ == null) {
-      throw new RuntimeException('No neighbours to find maximum, cannot calculate mutation for isolated player');
+    var sortedByIncome = sortedWith(destination, new Kotlin.kotlin.Comparator_x4fedy$$f(SimpleStrongestNeighbourMutation$mutate$lambda));
+    var maxIncome = first(sortedByIncome).generationIncomeToShow;
+    var tmp$_1;
+    var list = Kotlin.kotlin.collections.ArrayList_init_ww73n8$();
+    tmp$_1 = sortedByIncome.iterator();
+    while (tmp$_1.hasNext()) {
+      var item_0 = tmp$_1.next();
+      if (!(item_0.generationIncomeToShow === maxIncome))
+        break;
+      list.add_11rb$(item_0);
     }
-    var strongestNeighbour = tmp$;
-    SimpleStrongestNeighbourMutation$Companion_getInstance().log.debug_61zpoe$('Strongest neighbour is in ' + Kotlin.toString((tmp$_0 = strongestNeighbour.gamePosition) != null ? tmp$_0.coordinateText() : null) + ' ' + ('and have ' + strongestNeighbour.strategy + ' strategy ') + ('with ' + strongestNeighbour.generationIncomeToShow + ' generation income'));
+    var strongest = list;
+    var randomStrongest = this.random.nextInt_za3lpa$(strongest.size);
+    var strongestNeighbour = strongest.get_za3lpa$(randomStrongest);
+    SimpleStrongestNeighbourMutation$Companion_getInstance().log.debug_61zpoe$('Strongest neighbour is in ' + Kotlin.toString((tmp$ = strongestNeighbour.gamePosition) != null ? tmp$.coordinateText() : null) + ' ' + ('and have ' + strongestNeighbour.strategy + ' strategy ') + ('with ' + strongestNeighbour.generationIncomeToShow + ' generation income'));
     if (!Kotlin.equals(player.strategy, strongestNeighbour.strategy) && player.generationIncomeToShow < strongestNeighbour.generationIncomeToShow) {
       var mutateTo = strongestNeighbour.strategy;
       return new Player(mutateTo);
@@ -677,7 +676,7 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.leftPosition, other.leftPosition) && Kotlin.equals(this.rightPosition, other.rightPosition)))));
   };
   function getShuffleComparator$lambda(closure$random) {
-    return function (o1, o2) {
+    return function (f, f_0) {
       return closure$random.nextInt_za3lpa$(2) - 1 | 0;
     };
   }
@@ -1048,7 +1047,7 @@
     return Math.random();
   };
   JsRandom.prototype.nextInt_za3lpa$ = function (max) {
-    return Math.round(Math.random() * max);
+    return Math.random() * (max - 0 | 0) + 0 | 0;
   };
   JsRandom.prototype.nextInt = function () {
     return this.nextInt_za3lpa$(IntCompanionObject.MAX_VALUE - 1 | 0);
@@ -1316,7 +1315,7 @@
     (body != null ? body : Kotlin.throwNPE()).appendChild(canvas_0);
     body.appendChild(div_0);
     var render = Kotlin.isType(tmp$_0 = canvas_0.getContext('2d'), CanvasRenderingContext2D) ? tmp$_0 : Kotlin.throwCCE();
-    var trustMatrix = new TrustMatrix(50, 50, void 0, void 0, void 0, void 0, platformTools);
+    var trustMatrix = new TrustMatrix(100, 100, void 0, void 0, void 0, listOf([new SimpleStrongestNeighbourMutation(), new SpawnMutationUniform(setOf([Strategy$defaults_getInstance().alwaysCheat, Strategy$defaults_getInstance().alwaysCooperate, Strategy$defaults_getInstance().anEyeForAnEye, Strategy$defaults_getInstance().smartOne]))]), platformTools);
     var start = (new Date()).getTime();
     var canvasWidth = canvas_0.width * 1.0;
     var canvasHeight = canvas_0.height * 1.0;
