@@ -29,8 +29,6 @@
   var kotlin = Kotlin.kotlin;
   var get_create = $module$kotlinx_html_js.kotlinx.html.dom.get_create_4wc2mh$;
   var canvas = $module$kotlinx_html_js.kotlinx.html.canvas_q2368u$;
-  var p = $module$kotlinx_html_js.kotlinx.html.p_8pggrc$;
-  var div = $module$kotlinx_html_js.kotlinx.html.div_59el9d$;
   GameChoice.prototype = Object.create(Enum.prototype);
   GameChoice.prototype.constructor = GameChoice;
   SimpleStrongestNeighbourMutation.prototype = Object.create(PlayerMutation.prototype);
@@ -1284,13 +1282,7 @@
   };
   function main$lambda($receiver) {
   }
-  function main$lambda$lambda($receiver) {
-    $receiver.unaryPlus_pdl1vz$('test2');
-  }
-  function main$lambda_0($receiver) {
-    p($receiver, void 0, main$lambda$lambda);
-  }
-  function main$lambda_1(closure$trustMatrix, closure$render, closure$canvasWidth, closure$canvasHeight, closure$log, closure$xSize, closure$ySize) {
+  function main$lambda_0(closure$trustMatrix, closure$render, closure$canvasWidth, closure$canvasHeight, closure$log, closure$xSize, closure$ySize) {
     return function () {
       closure$trustMatrix.generate();
       drawMatrix(closure$render, closure$canvasWidth, closure$canvasHeight, closure$trustMatrix, closure$log, closure$xSize, closure$ySize);
@@ -1305,10 +1297,8 @@
     var canvas_0 = Kotlin.isType(tmp$ = canvas(get_create(document), void 0, main$lambda), HTMLCanvasElement) ? tmp$ : Kotlin.throwCCE();
     canvas_0.height = Math.min(window.innerHeight, window.innerWidth);
     canvas_0.width = Math.min(window.innerHeight, window.innerWidth);
-    var div_0 = div(get_create(document), 'div', main$lambda_0);
     var body = document.body;
     (body != null ? body : Kotlin.throwNPE()).appendChild(canvas_0);
-    body.appendChild(div_0);
     var render = Kotlin.isType(tmp$_0 = canvas_0.getContext('2d'), CanvasRenderingContext2D) ? tmp$_0 : Kotlin.throwCCE();
     var trustMatrix = new TrustMatrix(100, 100, void 0, void 0, void 0, platformTools, listOf([new SimpleStrongestNeighbourMutation(platformTools.random()), new SpawnMutationUniform(setOf([Strategy$defaults_getInstance().alwaysCheat, Strategy$defaults_getInstance().alwaysCooperate, Strategy$defaults_getInstance().anEyeForAnEye, Strategy$defaults_getInstance().smartOne]), void 0, platformTools.random())]));
     var start = (new Date()).getTime();
@@ -1316,7 +1306,7 @@
     var canvasHeight = canvas_0.height * 1.0;
     var ySize = canvasHeight / trustMatrix.yDimension;
     var xSize = canvasWidth / trustMatrix.xDimension;
-    var timerToGenerate = window.setInterval(main$lambda_1(trustMatrix, render, canvasWidth, canvasHeight, log, xSize, ySize), 400);
+    var timerToGenerate = window.setInterval(main$lambda_0(trustMatrix, render, canvasWidth, canvasHeight, log, xSize, ySize), 400);
   }
   function drawMatrix(render, canvasWidth, canvasHeight, trustMatrix, log, xSize, ySize) {
     render.fillStyle = 'white';
