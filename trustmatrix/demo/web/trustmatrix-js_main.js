@@ -19,10 +19,10 @@
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var sortedWith = Kotlin.kotlin.collections.sortedWith_eknfly$;
   var first = Kotlin.kotlin.collections.first_2p1efm$;
-  var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
-  var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var toList = Kotlin.kotlin.collections.toList_7wnvza$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
+  var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
+  var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var arrayListOf = Kotlin.kotlin.collections.arrayListOf_i5x0yv$;
   var HashSet_init = Kotlin.kotlin.collections.HashSet_init_287e2$;
   var IntCompanionObject = Kotlin.kotlin.js.internal.IntCompanionObject;
@@ -287,8 +287,6 @@
   };
   function SimpleStrongestNeighbourMutation(random, distortion) {
     SimpleStrongestNeighbourMutation$Companion_getInstance();
-    if (random === void 0)
-      random = Random$Companion_getInstance().DEFAULT;
     if (distortion === void 0)
       distortion = 0.5;
     PlayerMutation.call(this);
@@ -349,7 +347,7 @@
     SimpleStrongestNeighbourMutation$Companion_getInstance().log.debug_61zpoe$('Strongest neighbour is in ' + Kotlin.toString((tmp$ = strongestNeighbour.gamePosition) != null ? tmp$.coordinateText() : null) + ' ' + ('and have ' + strongestNeighbour.strategy + ' strategy ') + ('with ' + strongestNeighbour.generationIncomeToShow + ' generation income'));
     if (!Kotlin.equals(player.strategy, strongestNeighbour.strategy) && player.generationIncomeToShow < strongestNeighbour.generationIncomeToShow) {
       var mutateTo = strongestNeighbour.strategy;
-      return new Player(mutateTo);
+      return new Player(mutateTo, player.generation);
     }
     return null;
   };
@@ -362,8 +360,6 @@
     SpawnMutation$Companion_getInstance();
     if (probability === void 0)
       probability = 0.001;
-    if (random === void 0)
-      random = Random$Companion_getInstance().DEFAULT;
     PlayerMutation.call(this);
     this.spawnStrategy = spawnStrategy;
     this.probability = probability;
@@ -388,7 +384,7 @@
   SpawnMutation.prototype.mutate_akjf9f$ = function (player) {
     if (!Kotlin.equals(player.strategy, this.spawnStrategy) && this.random.nextDouble() > 1.0 - this.probability) {
       SpawnMutation$Companion_getInstance().log.debug_61zpoe$(player + ' spontaneously become ' + this.spawnStrategy);
-      return new Player(this.spawnStrategy);
+      return new Player(this.spawnStrategy, player.generation);
     }
     return null;
   };
@@ -400,8 +396,6 @@
   function SpawnMutationUniform(spawnStrategies, probability, random) {
     if (probability === void 0)
       probability = 0.001 * spawnStrategies.size;
-    if (random === void 0)
-      random = Random$Companion_getInstance().DEFAULT;
     PlayerMutation.call(this);
     this.spawnStrategies = spawnStrategies;
     this.probability = probability;
@@ -421,7 +415,7 @@
         destination.add_11rb$(element);
     }
     var spawnAllowedStrategies = destination;
-    return new Player(spawnAllowedStrategies.get_za3lpa$(this.random.nextInt_za3lpa$(spawnAllowedStrategies.size)));
+    return new Player(spawnAllowedStrategies.get_za3lpa$(this.random.nextInt_za3lpa$(spawnAllowedStrategies.size)), player.generation);
   };
   SpawnMutationUniform.$metadata$ = {
     kind: Kotlin.Kind.CLASS,
@@ -443,10 +437,6 @@
     interfaces: []
   };
   function Generation(previous, number, mutations) {
-    if (number === void 0)
-      number = previous == null ? Kotlin.Long.ZERO : previous.number.add(Kotlin.Long.fromInt(1));
-    if (mutations === void 0)
-      mutations = previous == null ? Player$Companion_getInstance().DEFAULT_MUTATIONS : previous.mutations;
     this.previous = previous;
     this.number = number;
     this.mutations = mutations;
@@ -456,9 +446,17 @@
     simpleName: 'Generation',
     interfaces: []
   };
+  function Generation_init(parent, $this) {
+    $this = $this || Object.create(Generation.prototype);
+    Generation.call($this, parent, parent.number.add(Kotlin.Long.fromInt(1)), parent.mutations);
+    return $this;
+  }
+  function Generation_init_0(mutations, $this) {
+    $this = $this || Object.create(Generation.prototype);
+    Generation.call($this, null, Kotlin.Long.ZERO, mutations);
+    return $this;
+  }
   function SpawnMutationConfigurable(spawnStrategies, random) {
-    if (random === void 0)
-      random = Random$Companion_getInstance().DEFAULT;
     PlayerMutation.call(this);
     this.spawnStrategies = spawnStrategies;
     this.random = random;
@@ -472,7 +470,7 @@
       var element = tmp$.next();
       spawnPosition.v += element.probabilityOnGeneration(player.generation);
       if (spawnPosition.v > coin) {
-        return new Player(element.spawnStrategy);
+        return new Player(element.spawnStrategy, player.generation);
       }
     }
     return null;
@@ -484,8 +482,6 @@
   };
   function Player(strategy, generation) {
     Player$Companion_getInstance();
-    if (generation === void 0)
-      generation = new Generation(null);
     this.strategy = strategy;
     this.generation = generation;
     this.generationIncomeToShow = 0;
@@ -497,7 +493,6 @@
   function Player$Companion() {
     Player$Companion_instance = this;
     this.log = LoggerBuilder$Companion_getInstance().factory(Kotlin.getKClass(Player)).getLogger();
-    this.DEFAULT_MUTATIONS = listOf([new SimpleStrongestNeighbourMutation(), new SpawnMutationUniform(setOf([Strategy$defaults_getInstance().alwaysCheat, Strategy$defaults_getInstance().alwaysCooperate, Strategy$defaults_getInstance().anEyeForAnEye]))]);
   }
   Player$Companion.$metadata$ = {
     kind: Kotlin.Kind.OBJECT,
@@ -695,16 +690,16 @@
     InitialDistribution$ALL_ALWAYS_COOPERATE_instance = new InitialDistribution('ALL_ALWAYS_COOPERATE', 0, InitialDistribution$InitialDistribution$ALL_ALWAYS_COOPERATE_init$lambda);
     InitialDistribution$ALL_ALWAYS_CHEAT_instance = new InitialDistribution('ALL_ALWAYS_CHEAT', 1, InitialDistribution$InitialDistribution$ALL_ALWAYS_CHEAT_init$lambda);
   }
-  function InitialDistribution$InitialDistribution$ALL_ALWAYS_COOPERATE_init$lambda(f, f_0) {
-    return new Player(Strategy$defaults_getInstance().alwaysCooperate);
+  function InitialDistribution$InitialDistribution$ALL_ALWAYS_COOPERATE_init$lambda(f, f_0, mutations) {
+    return new Player(Strategy$defaults_getInstance().alwaysCooperate, Generation_init_0(mutations));
   }
   var InitialDistribution$ALL_ALWAYS_COOPERATE_instance;
   function InitialDistribution$ALL_ALWAYS_COOPERATE_getInstance() {
     InitialDistribution_initFields();
     return InitialDistribution$ALL_ALWAYS_COOPERATE_instance;
   }
-  function InitialDistribution$InitialDistribution$ALL_ALWAYS_CHEAT_init$lambda(f, f_0) {
-    return new Player(Strategy$defaults_getInstance().alwaysCheat);
+  function InitialDistribution$InitialDistribution$ALL_ALWAYS_CHEAT_init$lambda(f, f_0, mutations) {
+    return new Player(Strategy$defaults_getInstance().alwaysCheat, Generation_init_0(mutations));
   }
   var InitialDistribution$ALL_ALWAYS_CHEAT_instance;
   function InitialDistribution$ALL_ALWAYS_CHEAT_getInstance() {
@@ -730,7 +725,7 @@
     }
   }
   InitialDistribution.valueOf_61zpoe$ = InitialDistribution$valueOf;
-  function TrustMatrix(xDimension, yDimension, initialDistribution, roundsNumber, game, mutations, platformTools) {
+  function TrustMatrix(xDimension, yDimension, initialDistribution, roundsNumber, game, platformTools, mutations) {
     TrustMatrix$defaults_getInstance();
     if (initialDistribution === void 0)
       initialDistribution = TrustMatrix$defaults_getInstance().ALL_ALWAYS_COOPERATE_DISTR;
@@ -739,15 +734,15 @@
     if (game === void 0)
       game = TrustMatrix$defaults_getInstance().DEFAULT_DILEMMA_GAME;
     if (mutations === void 0)
-      mutations = Player$Companion_getInstance().DEFAULT_MUTATIONS;
+      mutations = listOf([new SimpleStrongestNeighbourMutation(platformTools.random()), new SpawnMutationUniform(setOf([Strategy$defaults_getInstance().alwaysCheat, Strategy$defaults_getInstance().alwaysCooperate, Strategy$defaults_getInstance().anEyeForAnEye]), void 0, platformTools.random())]);
     this.xDimension = xDimension;
     this.yDimension = yDimension;
     this.initialDistribution = initialDistribution;
     this.roundsNumber = roundsNumber;
     this.game = game;
-    this.mutations = mutations;
     this.platformTools = platformTools;
-    this.generation = new Generation(null, void 0, this.mutations);
+    this.mutations = mutations;
+    this.generation = Generation_init_0(this.mutations);
     var size = this.yDimension;
     var array = Array(size);
     var tmp$;
@@ -758,7 +753,7 @@
       var tmp$_0;
       tmp$_0 = array_0.length - 1 | 0;
       for (var i_0 = 0; i_0 <= tmp$_0; i_0++) {
-        array_0[i_0] = new GamePosition(i, i_0, this.initialDistribution(i, i_0), arrayListOf([TrustMatrix$positionMatrix$lambda$lambda$lambda(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_0(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_1(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_2(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_3(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_4(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_5(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_6(i, i_0, this)]));
+        array_0[i_0] = new GamePosition(i, i_0, this.initialDistribution(i, i_0, this.mutations), arrayListOf([TrustMatrix$positionMatrix$lambda$lambda$lambda(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_0(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_1(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_2(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_3(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_4(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_5(i, i_0, this), TrustMatrix$positionMatrix$lambda$lambda$lambda_6(i, i_0, this)]));
       }
       array[i] = array_0;
     }
@@ -850,7 +845,7 @@
   TrustMatrix.prototype.generate = function () {
     this.play();
     this.mutate();
-    this.generation = new Generation(this.generation);
+    this.generation = Generation_init(this.generation);
     var $receiver = this.positionMatrix;
     var tmp$;
     for (tmp$ = 0; tmp$ !== $receiver.length; ++tmp$) {
@@ -919,7 +914,7 @@
   }
   function Random$Companion() {
     Random$Companion_instance = this;
-    this.DEFAULT = this.DEFAULT;
+    this.RANDOM_SOURCE = this.RANDOM_SOURCE;
   }
   Random$Companion.$metadata$ = {
     kind: Kotlin.Kind.OBJECT,
@@ -1016,7 +1011,7 @@
     log.info_61zpoe$('Initialize Color: ' + Kotlin.getKClass(JsColor));
     (new JsColor(JsColors$WHITE_getInstance())).toPlatform();
     log.info_61zpoe$('Initialize Random: ' + Kotlin.getKClass(JsRandom));
-    Random$Companion_getInstance().DEFAULT = new JsRandom();
+    Random$Companion_getInstance().RANDOM_SOURCE = new JsRandom();
   }
   function JsPlatformTools$JsPlatformTools$Companion_init$lambda(it) {
     return new JsLoggerFactory(it);
@@ -1034,7 +1029,7 @@
     return JsPlatformTools$Companion_instance;
   }
   JsPlatformTools.prototype.random = function () {
-    return new JsRandom();
+    return Random$Companion_getInstance().RANDOM_SOURCE;
   };
   JsPlatformTools.$metadata$ = {
     kind: Kotlin.Kind.CLASS,
@@ -1315,13 +1310,13 @@
     (body != null ? body : Kotlin.throwNPE()).appendChild(canvas_0);
     body.appendChild(div_0);
     var render = Kotlin.isType(tmp$_0 = canvas_0.getContext('2d'), CanvasRenderingContext2D) ? tmp$_0 : Kotlin.throwCCE();
-    var trustMatrix = new TrustMatrix(100, 100, void 0, void 0, void 0, listOf([new SimpleStrongestNeighbourMutation(), new SpawnMutationUniform(setOf([Strategy$defaults_getInstance().alwaysCheat, Strategy$defaults_getInstance().alwaysCooperate, Strategy$defaults_getInstance().anEyeForAnEye, Strategy$defaults_getInstance().smartOne]))]), platformTools);
+    var trustMatrix = new TrustMatrix(100, 100, void 0, void 0, void 0, platformTools, listOf([new SimpleStrongestNeighbourMutation(platformTools.random()), new SpawnMutationUniform(setOf([Strategy$defaults_getInstance().alwaysCheat, Strategy$defaults_getInstance().alwaysCooperate, Strategy$defaults_getInstance().anEyeForAnEye, Strategy$defaults_getInstance().smartOne]), void 0, platformTools.random())]));
     var start = (new Date()).getTime();
     var canvasWidth = canvas_0.width * 1.0;
     var canvasHeight = canvas_0.height * 1.0;
     var ySize = canvasHeight / trustMatrix.yDimension;
     var xSize = canvasWidth / trustMatrix.xDimension;
-    var timerToGenerate = window.setInterval(main$lambda_1(trustMatrix, render, canvasWidth, canvasHeight, log, xSize, ySize), 200);
+    var timerToGenerate = window.setInterval(main$lambda_1(trustMatrix, render, canvasWidth, canvasHeight, log, xSize, ySize), 400);
   }
   function drawMatrix(render, canvasWidth, canvasHeight, trustMatrix, log, xSize, ySize) {
     render.fillStyle = 'white';
@@ -1371,6 +1366,8 @@
   package$trustmatrix.SpawnMutation = SpawnMutation;
   package$trustmatrix.SpawnMutationUniform = SpawnMutationUniform;
   package$trustmatrix.SpawnStrategyControl = SpawnStrategyControl;
+  package$trustmatrix.Generation_init_reznsq$ = Generation_init;
+  package$trustmatrix.Generation_init_zidw2p$ = Generation_init_0;
   package$trustmatrix.Generation = Generation;
   package$trustmatrix.SpawnMutationConfigurable = SpawnMutationConfigurable;
   Object.defineProperty(Player, 'Companion', {
